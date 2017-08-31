@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>title</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+        <style>
+            #map {
+                width: 100%;
+                height: 400px;
+                background-color: grey;
+            }
+        </style>
+    </head>
+    <body>
+        <script src="http://code.jquery.com/jquery.js"></script>
+        <script src="https://unpkg.com/vue"></script>
+        <div id="app" class="container">
+            <h1 class="text-center">Where is Jake?</h1>
+            <div id="map"></div>
+            <table class="table">
+                <tr>
+                    <th>
+                        Time
+                    </th>
+                    <th>
+                        Address
+                    </th>
+                    <th>
+                        Latitude
+                    </th>
+                    <th>
+                        Longitude
+                    </th>
+                </tr>
+                <tr v-for="location in locations">
+                    <td>
+                        {{ location.time }}
+                    </td>
+                    <td>
+                        {{ location.address }}
+                    </td>
+                    <td>
+                        {{ location.latitude }}
+                    </td>
+                    <td>
+                        {{ location.longitude }}
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <button onclick="updateHistory()">
+            Refresh
+        </button>
+        <script>
+            var map;
+            var app = new Vue({
+                el: '#app',
+                data: {
+                    locations: []
+                }
+            });
+
+            function createMap() {
+                map = new google.maps.Map(document.getElementById('map'), {
+                    zoom: 6,
+                    center: {
+                        lat: 40.3641,
+                        lng: -111.7385
+                    },
+                    mapTypeId: google.maps.MapTypeId.ROADMAP
+                });
+                
+                setTimeout(updateHistory, 60000);
+            }
+
+            function updateHistory() {
+                $.ajax({
+                    url: '/history'
+                }).done(function(result) {
+                    app.locations = result.locations;
+                    var markers = [];
+                    for (var i = 0; i < result.locations.length; i++) {
+                        markers.push(new google.maps.Marker({
+                            position: {
+                                lat: result.locations[0].latitude,
+                                lng: result.locations[0].longitude
+                            },
+                            map: map
+                        }));
+                        debugger;
+                    }
+                    setTimeout(updateHistory, 60000);
+                });
+            }
+    </script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?&key=AIzaSyAyD8pXVF4UIfdE-zcnUiMs2pgUWyDMxyA&callback=createMap">
+    </script>
+    </body>
+</html>
